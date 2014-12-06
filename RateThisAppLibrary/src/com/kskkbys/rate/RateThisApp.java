@@ -39,14 +39,17 @@ public class RateThisApp {
 	private static final String TAG = RateThisApp.class.getSimpleName();
 	
 	private static final String PREF_NAME = "RateThisApp";
+    private static final String KEY_FIRST_INSTALL_DATE = "rta_first_install_date";
 	private static final String KEY_INSTALL_DATE = "rta_install_date";
 	private static final String KEY_LAUNCH_TIMES = "rta_launch_times";
 	private static final String KEY_OPT_OUT = "rta_opt_out";
-	
-	private static Date mInstallDate = new Date();
+    private static final String KEY_ACTUAL_LAUNCH_TIMES = "rta_actual_launch_times";
+
+    private static Date mInstallDate = new Date();
 	private static int mLaunchTimes = 0;
 	private static boolean mOptOut = false;
-	
+	private static int mActualLaunchTimes = 0;
+
 	/**
 	 * Days after installation until showing rate dialog
 	 */
@@ -60,8 +63,9 @@ public class RateThisApp {
 	 * If true, print LogCat
 	 */
 	public static final boolean DEBUG = false;
-	
-	/**
+    private static Date mFirstInstallDate;
+
+    /**
 	 * Call this API when the launcher activity is launched.<br>
 	 * It is better to call this API in onStart() of the launcher activity.
 	 */
@@ -69,21 +73,33 @@ public class RateThisApp {
 		SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
 		Editor editor = pref.edit();
 		// If it is the first launch, save the date in shared preference.
+        if (pref.getLong(KEY_FIRST_INSTALL_DATE, 0) == 0L) {
+            Date now = new Date();
+            long installDate = pref.getLong(KEY_INSTALL_DATE, 0);
+            editor.putLong(KEY_FIRST_INSTALL_DATE, installDate);
+            log("First install: " + now.toString());
+        }
 		if (pref.getLong(KEY_INSTALL_DATE, 0) == 0L) {
 			Date now = new Date();
 			editor.putLong(KEY_INSTALL_DATE, now.getTime());
-			log("First install: " + now.toString());
+			log("Install install: " + now.toString());
 		}
 		// Increment launch times
 		int launchTimes = pref.getInt(KEY_LAUNCH_TIMES, 0);
 		launchTimes++;
 		editor.putInt(KEY_LAUNCH_TIMES, launchTimes);
+		int actualLaunchTimes = pref.getInt(KEY_ACTUAL_LAUNCH_TIMES, 0);
+		actualLaunchTimes++;
+		editor.putInt(KEY_ACTUAL_LAUNCH_TIMES, actualLaunchTimes);
+		log("Actual Launch times; " + actualLaunchTimes);
 		log("Launch times; " + launchTimes);
-		
+
 		editor.commit();
-		
-		mInstallDate = new Date(pref.getLong(KEY_INSTALL_DATE, 0));
+
+        mFirstInstallDate = new Date(pref.getLong(KEY_FIRST_INSTALL_DATE, 0));
+        mInstallDate = new Date(pref.getLong(KEY_INSTALL_DATE, 0));
 		mLaunchTimes = pref.getInt(KEY_LAUNCH_TIMES, 0);
+		mActualLaunchTimes = pref.getInt(KEY_ACTUAL_LAUNCH_TIMES, 0);
 		mOptOut = pref.getBoolean(KEY_OPT_OUT, false);
 		
 		printStatus(context);
@@ -93,10 +109,12 @@ public class RateThisApp {
 	 * Show the rate dialog if the criteria is satisfied
 	 * @param context
 	 */
-	public static void showRateDialogIfNeeded(final Context context) {
-		if (shouldShowRateDialog()) {
+	public static boolean showRateDialogIfNeeded(final Context context) {
+        boolean show = shouldShowRateDialog();
+        if (show) {
 			showRateDialog(context);
 		}
+        return show;
 	}
 	
 	/**
@@ -202,4 +220,20 @@ public class RateThisApp {
 			Log.v(TAG, message);
 		}
 	}
+
+    public static Date getInstallationDate () {
+        return mInstallDate;
+    }
+
+    public static int getLaunchTimes() {
+        return mLaunchTimes;
+    }
+
+    public static Date getFirstInstallDate() {
+        return mFirstInstallDate;
+    }
+
+    public static int getActualLaunchTimes() {
+        return mActualLaunchTimes;
+    }
 }

@@ -1,0 +1,9 @@
+<resources>
+
+    <string name="rta_dialog_title">Оцените это приложение</string>
+    <string name="rta_dialog_message">Если вам нравится этот app, Пожалуйста, оцените эту программу. Она выиграла\'t займет больше минуты. Спасибо за вашу поддержку!</string>
+    <string name="rta_dialog_ok">Сейчас ставка</string>
+    <string name="rta_dialog_cancel">Напомнить позже</string>
+    <string name="rta_dialog_no">Нет, Спасибо</string>
+
+</resources>
